@@ -5,7 +5,7 @@
     <div class="container">
         <p class="eyebrow">Staff Directory</p>
         <h1>User Accounts</h1>
-        <p>System staff and store user accounts loaded from the controller's static PHP array.</p>
+        <p>System staff and user accounts retrieved from the database via the User Eloquent model.</p>
         <div class="actions">
             <a class="button button-primary" href="{{ url('/customers') }}">View Customer Accounts</a>
             <a class="button" href="{{ url('/') }}">Back to Home</a>
@@ -15,7 +15,7 @@
 
 <section class="container content-section">
     <div class="notice">
-        <strong>Data Source Note:</strong> These staff records are rendered dynamically via Laravel's Blade engine using <code>@@foreach</code> from a static PHP array defined in <code>UserController</code>.
+        <strong>Data Source Note:</strong> These staff records are retrieved dynamically from the database using Laravel's Eloquent ORM (<code>User::orderBy('id', 'asc')->get()</code>) and looped through using <code>@@foreach</code> in Blade.
     </div>
 
     <div class="table-card">
@@ -25,33 +25,21 @@
                     <th>User ID</th>
                     <th>Username</th>
                     <th>Full Name</th>
-                    <th>Role</th>
-                    <th>Email</th>
-                    <th>Status</th>
                     <th>Created At</th>
                 </tr>
             </thead>
             <tbody>
-                @if (empty($users))
+                @if ($users->isEmpty())
                     <tr>
-                        <td colspan="7" style="text-align: center;">No user records found.</td>
+                        <td colspan="4" style="text-align: center;">No user records found.</td>
                     </tr>
                 @else
                     @foreach ($users as $user)
                         <tr>
-                            <td>#{{ $user['id'] }}</td>
-                            <td><code>{{ $user['username'] }}</code></td>
-                            <td><strong>{{ $user['full_name'] }}</strong></td>
-                            <td>
-                                <span class="badge {{ str_contains($user['role'], 'Admin') ? 'badge-admin' : (str_contains($user['role'], 'Cashier') ? 'badge-cashier' : 'badge-staff') }}">
-                                    {{ $user['role'] }}
-                                </span>
-                            </td>
-                            <td>{{ $user['email'] }}</td>
-                            <td>
-                                <span class="badge badge-active">{{ $user['status'] }}</span>
-                            </td>
-                            <td>{{ $user['created_at'] }}</td>
+                            <td>#{{ $user->id }}</td>
+                            <td><code>{{ $user->username }}</code></td>
+                            <td><strong>{{ $user->full_name }}</strong></td>
+                            <td>{{ $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : 'N/A' }}</td>
                         </tr>
                     @endforeach
                 @endif
@@ -60,7 +48,7 @@
     </div>
 
     <div style="margin-top: 18px;">
-        <p>Total Records Displayed: <strong>{{ count($users) }}</strong></p>
+        <p>Total Records Displayed: <strong>{{ $users->count() }}</strong></p>
     </div>
 </section>
 @endsection

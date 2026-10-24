@@ -1,74 +1,73 @@
-# IT0049 - Technical Formative Assessment 5 (TFA5)
-## From Zero to Four Pages, Again: Your First Laravel Application
+# IT0049 - Technical Formative Assessment 6 (TFA6)
+## From Arrays to Eloquent: Database-Backed Laravel Application
 
 **Course:** IT0049 (Web System Technologies)  
 **Program:** College of Computer Studies and Multimedia Arts  
-**Assessment:** Technical Formative Assessment 5  
-**Topic:** Rebuilding the POS Application in Laravel with MVC Architecture  
-**Author:** RJCodeson  
+**Assessment:** Technical Formative Assessment 6 (TFA6)  
+**Topic:** Migrations, Database Seeders, and Eloquent ORM Integration  
 
 ---
 
 ## 1. Project Overview
 
-This project is a replication and architectural upgrade of the Point of Sale (POS) application originally introduced in TFA1. It demonstrates the fundamental principles of web frameworks and the **Model-View-Controller (MVC)** architecture using **Laravel 12 / PHP 8.2+**.
+This project transitions the POS (Point of Sale) application from temporary static PHP arrays (TFA5) to a fully database-backed web application using **Laravel Migrations**, **Database Seeders**, and **Eloquent ORM**, implementing the schema established in TFA2.
 
-### Key Deliverables:
-- **Four Distinct Pages:**
-  1. Landing Page (`/` &rarr; `PageController@home`)
-  2. About Page (`/about` &rarr; `PageController@about`)
-  3. Customer Accounts Directory (`/customers` &rarr; `CustomerController@index`)
-  4. User / Staff Accounts Directory (`/users` &rarr; `UserController@index`)
-- **Data Source Handling:** The Customer Accounts and User Accounts pages utilize structured **static PHP arrays** inside their respective controllers as temporary data sources.
-- **Blade Templating:** A responsive, shared master layout (`resources/views/layouts/app.blade.php`) with navigation links across all pages and `@foreach` loops rendering tabular data.
-- **Database Migrations & Seeders:** Included in `database/` along with a standalone `database_export.sql` file to satisfy submission criteria.
-- **Automated Feature Tests:** Pre-configured PHPUnit test suite verifying all 4 routes and status 200 responses.
+### Core Features:
+- **Database Migrations:** Schema definitions for `customers` and `users` tables managed via version-controlled migration files.
+- **Database Seeders:** Automated seeding of realistic records matching the TFA2 schema using Eloquent models.
+- **Eloquent Models:** `Customer` and `User` models encapsulating database interactions without raw SQL queries.
+- **MVC Architecture:** Controllers query the database through Eloquent (`Customer::orderBy('id', 'asc')->get()`, `User::orderBy('id', 'asc')->get()`) and pass datasets to Blade templates.
+- **Blade Views:** Shared layout (`resources/views/layouts/app.blade.php`) and `@foreach` loops rendering customer and user records.
+- **Automated Feature Tests:** PHPUnit test suite validating all routes, HTTP 200 responses, and database record rendering.
+- **Raw SQL Export:** Complete schema and data dump provided in `database/database_export.sql`.
 
 ---
 
-## 2. Route Architecture & MVC Mapping
+## 2. Database Schema (TFA2 Specification)
 
-| Method | URI | Controller Action | View Template | Description |
+### `customers` Table
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| `id` | BIGINT UNSIGNED | PRIMARY KEY, AUTO_INCREMENT | Customer unique identifier |
+| `full_name` | VARCHAR(100) | NOT NULL | Customer full name |
+| `email` | VARCHAR(100) | NOT NULL | Contact email address |
+| `phone` | VARCHAR(20) | NULLABLE | Contact telephone / mobile number |
+| `created_at` | TIMESTAMP | NULLABLE | Record creation timestamp |
+| `updated_at` | TIMESTAMP | NULLABLE | Record last update timestamp |
+
+### `users` Table
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| `id` | BIGINT UNSIGNED | PRIMARY KEY, AUTO_INCREMENT | User unique identifier |
+| `username` | VARCHAR(50) | UNIQUE, NOT NULL | Unique login handle |
+| `password` | VARCHAR(255) | NOT NULL | Encrypted password string |
+| `full_name` | VARCHAR(100) | NOT NULL | Employee / user full name |
+| `avatar` | VARCHAR(255) | NULLABLE | Profile picture filename or path |
+| `remember_token` | VARCHAR(100) | NULLABLE | Token for persistent sessions |
+| `created_at` | TIMESTAMP | NULLABLE | Record creation timestamp |
+| `updated_at` | TIMESTAMP | NULLABLE | Record last update timestamp |
+
+---
+
+## 3. Route Architecture & Controller Mapping
+
+| Method | URI | Controller Action | View Template | Data Source |
 |---|---|---|---|---|
-| `GET` | `/` | `PageController@home` | `resources/views/pages/home.blade.php` | POS Landing Page with system module overviews and navigation |
-| `GET` | `/about` | `PageController@about` | `resources/views/pages/about.blade.php` | Project documentation, course ILOs, and Laravel MVC workflow |
-| `GET` | `/customers` | `CustomerController@index` | `resources/views/customers/index.blade.php` | Customer directory rendered via `@foreach` from a static PHP array |
-| `GET` | `/users` | `UserController@index` | `resources/views/users/index.blade.php` | Staff directory rendered via `@foreach` from a static PHP array |
+| `GET` | `/` | `PageController@home` | `resources/views/pages/home.blade.php` | Static / View Data |
+| `GET` | `/about` | `PageController@about` | `resources/views/pages/about.blade.php` | Static / Documentation |
+| `GET` | `/customers` | `CustomerController@index` | `resources/views/customers/index.blade.php` | `Customer::orderBy('id', 'asc')->get()` |
+| `GET` | `/users` | `UserController@index` | `resources/views/users/index.blade.php` | `User::orderBy('id', 'asc')->get()` |
 
 ---
 
-## 3. Data Source Architecture (Static PHP Arrays)
+## 4. Installation & Local Setup Guide
 
-Per the laboratory requirements, `CustomerController` and `UserController` declare sample datasets using `protected static array`:
+### Prerequisites
+- PHP >= 8.2 (with `pdo`, `pdo_sqlite` or `pdo_mysql`, `openssl`, `mbstring` enabled)
+- Composer >= 2.0
+- Git
 
-### Customer Records Sample (`CustomerController`):
-- `id`: Customer identifier (`101`, `102`, etc.)
-- `full_name`: Customer name
-- `email`: Contact email address
-- `phone`: Mobile phone number
-- `address`: Billing / physical address
-- `membership`: Tier classification (`VIP` vs. `Regular`)
-- `total_spent`: Transaction history total
-
-### Staff User Records Sample (`UserController`):
-- `id`: User account identifier (`1`, `2`, etc.)
-- `username`: System handle (e.g., `admin_juan`, `maria_cashier`)
-- `full_name`: Staff member's name
-- `role`: System privilege (`System Administrator`, `Head Cashier`, `Store Manager`, etc.)
-- `email`: Corporate email address
-- `status`: Work status (`Active`, `On Duty`)
-- `created_at`: Account provisioning timestamp
-
----
-
-## 4. Local Installation & Setup Guide
-
-### Prerequisites:
-- **PHP >= 8.2** (e.g. from XAMPP or PHP standalone)
-- **Composer >= 2.0**
-- **Git**
-
-### Step-by-Step Setup:
+### Step-by-Step Instructions
 
 1. **Clone the repository:**
    ```bash
@@ -76,39 +75,39 @@ Per the laboratory requirements, `CustomerController` and `UserController` decla
    cd naluan-tfa5
    ```
 
-2. **Install Composer dependencies:**
+2. **Install dependencies:**
    ```bash
    composer install
    ```
 
-3. **Environment configuration:**
-   Copy the `.env.example` file to create your `.env`:
+3. **Configure the environment:**
    ```bash
    cp .env.example .env
-   ```
-   Generate the application encryption key:
-   ```bash
    php artisan key:generate
    ```
 
-4. **Database setup (Optional/Migration & Seeders):**
+4. **Run migrations and seeders:**
    ```bash
-   php artisan migrate --seed
+   php artisan migrate:fresh --seed
    ```
-   *Note: An SQL dump is also provided in `database/database_export.sql`.*
+   *This drops existing tables, runs migrations for customers and users, and seeds sample data.*
 
 5. **Start the local development server:**
    ```bash
-   php artisan serve
+   php artisan serve --host=127.0.0.1 --port=8000
    ```
-   The application will be live at `http://127.0.0.1:8000`.
+
+6. **Access the application in your browser:**
+   - Landing Page: `http://127.0.0.1:8000/`
+   - About Page: `http://127.0.0.1:8000/about`
+   - Customer Accounts: `http://127.0.0.1:8000/customers`
+   - User Accounts: `http://127.0.0.1:8000/users`
 
 ---
 
-## 5. Running Automated Tests
+## 5. Automated Testing
 
-Run the included PHPUnit feature tests to verify that all routes and static array loops operate cleanly:
-
+Run the feature and unit test suite:
 ```bash
 php artisan test
 ```
@@ -124,48 +123,59 @@ PASS  Tests\Feature\ExampleTest
 PASS  Tests\Feature\PageRoutesTest
 ✓ landing page returns successful response
 ✓ about page returns successful response
-✓ customers page returns successful response with records
-✓ users page returns successful response with records
+✓ customers page returns successful response with eloquent records
+✓ users page returns successful response with eloquent records
 
-Tests:  6 passed (25 assertions)
+Tests:  6 passed (26 assertions)
 ```
 
 ---
 
-## 6. Directory Structure Overview
+## 6. Directory Structure
 
 ```text
 naluan-tfa5/
 ├── app/
-│   └── Http/
-│       └── Controllers/
-│           ├── Controller.php
-│           ├── PageController.php       # Landing & About routes
-│           ├── CustomerController.php   # Static customer array
-│           └── UserController.php       # Static staff user array
+│   ├── Http/
+│   │   └── Controllers/
+│   │       ├── Controller.php
+│   │       ├── PageController.php
+│   │       ├── CustomerController.php    # Queries Customer Eloquent model
+│   │       └── UserController.php        # Queries User Eloquent model
+│   └── Models/
+│       ├── Customer.php                  # Eloquent model for customers
+│       └── User.php                      # Eloquent model for users
 ├── database/
-│   ├── database_export.sql              # Raw SQL export for submission
-│   ├── migrations/                      # Table definitions (customers, users)
-│   └── seeders/                         # Seed data matching static arrays
+│   ├── database_export.sql               # TFA2-compatible SQL schema & data dump
+│   ├── migrations/
+│   │   ├── 0001_01_01_000000_create_users_table.php
+│   │   └── 2026_10_17_134905_create_customers_table.php
+│   └── seeders/
+│       ├── DatabaseSeeder.php
+│       ├── CustomerSeeder.php            # Populates customer sample records
+│       └── UserSeeder.php                # Populates user sample records
 ├── public/
-│   └── css/
-│       └── style.css                    # Responsive TFA styling
+│   ├── css/
+│   │   └── style.css                     # Responsive application stylesheet
+│   └── index.php
 ├── resources/
 │   └── views/
 │       ├── layouts/
-│       │   └── app.blade.php            # Shared master layout with navigation
+│       │   └── app.blade.php             # Master layout with navigation
 │       ├── pages/
-│       │   ├── home.blade.php           # Landing page view
-│       │   └── about.blade.php          # About page view
+│       │   ├── home.blade.php            # Landing page
+│       │   └── about.blade.php           # About page
 │       ├── customers/
-│       │   └── index.blade.php          # Customer list (@foreach loop)
+│       │   └── index.blade.php           # Customer accounts table (@foreach)
 │       └── users/
-│           └── index.blade.php          # User list (@foreach loop)
+│           └── index.blade.php           # User accounts table (@foreach)
 ├── routes/
-│   └── web.php                          # Defined routes for all 4 pages
+│   └── web.php                           # Route definitions
 ├── tests/
 │   └── Feature/
-│       └── PageRoutesTest.php           # Automated test coverage
+│       └── PageRoutesTest.php            # Automated route & Eloquent tests
+├── .htaccess                             # Root redirect for shared hosting
+├── index.php                             # Root entry point for shared hosting
 └── README.md
 ```
 
@@ -173,11 +183,11 @@ naluan-tfa5/
 
 ## 7. Submission Checklist
 
-- [x] Rebuilt POS application with 4 pages (`/`, `/about`, `/customers`, `/users`)
-- [x] Routes registered in `routes/web.php`
-- [x] `PageController`, `CustomerController`, and `UserController` implemented
-- [x] Static PHP arrays with &ge; 5 records in `CustomerController` and `UserController`
-- [x] Blade views using master layout and `@foreach` loops
-- [x] Database migration, seeders, and `database_export.sql` provided
-- [x] Automated test suite passing (6 tests, 25 assertions)
-- [x] Git repository with comprehensive documentation
+- [x] Migrations for `customers` (`full_name`, `email`, `phone`) and `users` (`username` unique, `full_name`) matching TFA2 schema
+- [x] Database seeder populating sample records for both tables
+- [x] `Customer` and `User` Eloquent models created in `app/Models/`
+- [x] `CustomerController` and `UserController` updated to retrieve records through Eloquent models
+- [x] Blade views displaying retrieved Eloquent records with `@foreach` loops
+- [x] Raw SQL database export provided at `database/database_export.sql`
+- [x] Automated test suite passing with 6 tests (26 assertions)
+- [x] Git repository organized and up to date

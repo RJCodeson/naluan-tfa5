@@ -13,12 +13,9 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name');
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
-            $table->string('address')->nullable();
-            $table->string('membership')->default('Regular');
-            $table->string('total_spent')->default('₱0.00');
+            $table->string('full_name', 100);
+            $table->string('email', 100);
+            $table->string('phone', 20)->nullable();
             $table->timestamps();
         });
     }
